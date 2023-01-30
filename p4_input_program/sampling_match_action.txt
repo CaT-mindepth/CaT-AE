@@ -1,0 +1,4 @@
+Table: sampling
+Fields: sample_key
+Values: 5
+Action: set_pkt
