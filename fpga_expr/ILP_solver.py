@@ -302,12 +302,12 @@ def solve_ILP(pkt_fields_def, tmp_fields_def, stateful_var_def,
             end_str = "%s_end" % tmp_field
             var_l.append(beg_str)
             var_l.append(end_str)
-        for v in m.getVars():
-            # if v.varName != 'cost' and v.varName.find('stage') == -1:
-            # if v.varName in var_l or v.varName == 'cost':
-            #     print('%s %g' % (v.varName, v.x))
-            if v.varName == 'cost':
-                print('Total number of stages used is %g (zero index)' % v.x)
+        # for v in m.getVars():
+        #     # if v.varName != 'cost' and v.varName.find('stage') == -1:
+        #     if v.varName in var_l or v.varName == 'cost':
+        #         print('%s %g' % (v.varName, v.x))
+        #     if v.varName == 'cost':
+        #         print('Total number of stages used is %g (zero index)' % v.x)
         # print("************************************************")
         # print(m.getJSONSolution())
         return m.getJSONSolution()        
