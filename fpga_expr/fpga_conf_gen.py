@@ -54,76 +54,16 @@ def valid_ram_list(ram_list):
             return True
     return False
 
+def clean_operand(op):
+    if op[:2] == 'p_':
+        op = op[2:]
+    while op[-1] >= '0' and op[-1] <= '9':
+        op = op[:-1]
+    return op
+
 def text_gen(pkt_fields_def, tmp_fields_def, stateful_var_def, table_act_dic, table_size_dic, match_field_dic,
 match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, update_var_dic, update_state_dic,
- ILP_alloc):
-
-# def main(argv):
-#     # four table benchmark5
-#     pkt_fields_def = ['pkt_0','pkt_1','pkt_2','pkt_3','pkt_4','pkt_5','pkt_6','pkt_7','pkt_8','pkt_9','pkt_10','pkt_11','pkt_12','pkt_13','pkt_14','pkt_15','pkt_16']
-#     tmp_fields_def = [] # all temporary variables
-#     stateful_var_def = ['s0'] # all stateful variables
-
-#     table_act_dic = {'ipv4_dest_vtep':['set_tunnel_termination_flag','set_tunnel_vni_and_termination_flag'],
-#                     'ingress_l4_src_port':['set_ingress_src_port_range_id'],
-#                     'ipv4_multicast_bridge':['multicast_bridge_s_g_hit'],
-#                     'ipv4_multicast_route':['multicast_route_s_g_hit_0'],
-#                     'sampling_table': ['sampling']}
-#     table_size_dic = {'ipv4_dest_vtep':1024,
-#                         'ingress_l4_src_port':512,
-#                         'ipv4_multicast_bridge':1024,
-#                         'ipv4_multicast_route':1024,
-#                         'sampling_table':1}
-#     match_field_dic = {'ipv4_dest_vtep' : ['pkt_2','pkt_3','pkt_4'],
-#                         'ingress_l4_src_port': ['pkt_6'],
-#                         'ipv4_multicast_bridge':['pkt_9','pkt_10','pkt_11'],
-#                         'ipv4_multicast_route':['pkt_2','pkt_10','pkt_11'],
-#                         'sampling_table': ['pkt_0']}
-#     match_action_rule = {'ipv4_dest_vtep' : [({'pkt_2' : 5,'pkt_3':5,'pkt_4':5}, 'set_tunnel_vni_and_termination_flag')],
-#                         'ingress_l4_src_port' : [({'pkt_6':5}, 'set_ingress_src_port_range_id')],
-#                         'ipv4_multicast_bridge': [({'pkt_9':5, 'pkt_10':5,'pkt_11':5}, 'multicast_bridge_s_g_hit')],
-#                         'ipv4_multicast_route':[({'pkt_2':5, 'pkt_10':5,'pkt_11':5},'multicast_route_s_g_hit_0')],
-#                         "sampling_table": [({'pkt_0' : 5}, 'sampling')]}
-#     tmp_alu_dic = {} #key: tmp packet fields, val: a list of list of size 3, [['table name', 'action name', 'alu name']]
-#     state_var_op_dic = {
-#         's0':[['sampling_table','sampling','ALU1']],
-#     }
-#     action_alu_dic = {'ipv4_dest_vtep': {'set_tunnel_termination_flag':['ALU1'],
-#                                         'set_tunnel_vni_and_termination_flag':['ALU1','ALU2']},
-#                         'ingress_l4_src_port': {'set_ingress_src_port_range_id':['ALU1']},
-#                         'ipv4_multicast_bridge':{'multicast_bridge_s_g_hit':['ALU1','ALU2']},
-#                         'ipv4_multicast_route':{'multicast_route_s_g_hit_0':['ALU1','ALU2','ALU3','ALU4']}, 
-#                         'sampling_table': {'sampling':['ALU1','ALU2']}
-#                         }
-#     pkt_alu_dic = {
-#         'pkt_0':[['ipv4_dest_vtep','set_tunnel_termination_flag','ALU1'],['ipv4_dest_vtep','set_tunnel_vni_and_termination_flag','ALU2']],
-#         'pkt_1':[['ipv4_dest_vtep','set_tunnel_vni_and_termination_flag','ALU1'],['sampling_table','sampling','ALU2']],
-#         'pkt_5':[['ingress_l4_src_port','set_ingress_src_port_range_id','ALU1']],
-#         'pkt_7':[['ipv4_multicast_bridge','multicast_bridge_s_g_hit','ALU1']],
-#         'pkt_8':[['ipv4_multicast_bridge','multicast_bridge_s_g_hit','ALU2']],
-#         'pkt_12':[['ipv4_multicast_route','multicast_route_s_g_hit_0','ALU1']],
-#         'pkt_13':[['ipv4_multicast_route','multicast_route_s_g_hit_0','ALU2']],
-#         'pkt_14':[['ipv4_multicast_route','multicast_route_s_g_hit_0','ALU3']],
-#         'pkt_15':[['ipv4_multicast_route','multicast_route_s_g_hit_0','ALU4']]
-#     }
-#     update_var_dic = {
-#         'ipv4_dest_vtep_set_tunnel_termination_flag_ALU1':{"opcode": 0, "operand0": "pkt_0", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 1},
-#         'ipv4_dest_vtep_set_tunnel_vni_and_termination_flag_ALU1':{"opcode": 0, "operand0": "pkt_0", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 7},
-#         'ipv4_dest_vtep_set_tunnel_vni_and_termination_flag_ALU2':{"opcode": 0, "operand0": "pkt_0", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 1},
-#         'ingress_l4_src_port_set_ingress_src_port_range_id_ALU1':{"opcode": 0, "operand0": "pkt_0", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 7},
-#         'ipv4_multicast_bridge_multicast_bridge_s_g_hit_ALU1':{"opcode": 0, "operand0": "pkt_0", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 7},
-#         'ipv4_multicast_bridge_multicast_bridge_s_g_hit_ALU2':{"opcode": 0, "operand0": "pkt_0", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 1},
-#         'ipv4_multicast_route_multicast_route_s_g_hit_0_ALU1':{"opcode": 0, "operand0": "pkt_0", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 7},
-#         'ipv4_multicast_route_multicast_route_s_g_hit_0_ALU2':{"opcode": 0, "operand0": "pkt_0", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 1},
-#         'ipv4_multicast_route_multicast_route_s_g_hit_0_ALU3':{"opcode": 0, "operand0": "pkt_0", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 1},
-#         'ipv4_multicast_route_multicast_route_s_g_hit_0_ALU4':{"opcode": 2, "operand0": "pkt_16", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 0},
-#         'sampling_table_sampling_ALU2':{"opcode":9, "operand0": "s0", "operand1":"pkt_1", "operand2":"pkt_1", "immediate_operand": 29},
-#     }
-#     update_state_dic = {
-#         'sampling_table_sampling_ALU1':"00001100"+"000000"+"000000"+"000000"+"01110100000000000101011001011000000000",
-#     }
-#     ILP_alloc = { "SolutionInfo": { "Status": 2, "Runtime": 4.5320987701416016e-02, "Work": 3.3978260090297384e-02, "ObjVal": 2, "ObjBound": 2, "ObjBoundC": 2, "MIPGap": 0, "IntVio": 0, "BoundVio": 0, "ConstrVio": 0, "IterCount": 0, "BarIterCount": 0, "NodeCount": 0, "SolCount": 4, "PoolObjBound": 2, "PoolObjVal": [ 2, 9, 10, 11]}, "Vars": [ { "VarName": "cost", "X": 2}, { "VarName": "ipv4_dest_vtep_M0", "X": 2}, { "VarName": "ipv4_dest_vtep_M0_set_tunnel_termination_flag_ALU1_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M0_set_tunnel_vni_and_termination_flag_ALU1_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M0_set_tunnel_vni_and_termination_flag_ALU2_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M1", "X": 2}, { "VarName": "ipv4_dest_vtep_M1_set_tunnel_termination_flag_ALU1_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M1_set_tunnel_vni_and_termination_flag_ALU1_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M1_set_tunnel_vni_and_termination_flag_ALU2_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M2", "X": 2}, { "VarName": "ipv4_dest_vtep_M2_set_tunnel_termination_flag_ALU1_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M2_set_tunnel_vni_and_termination_flag_ALU1_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M2_set_tunnel_vni_and_termination_flag_ALU2_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M3", "X": 2}, { "VarName": "ipv4_dest_vtep_M3_set_tunnel_termination_flag_ALU1_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M3_set_tunnel_vni_and_termination_flag_ALU1_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M3_set_tunnel_vni_and_termination_flag_ALU2_stage0", "X": 1}, { "VarName": "ingress_l4_src_port_M0", "X": 2}, { "VarName": "ingress_l4_src_port_M0_set_ingress_src_port_range_id_ALU1", "X": 1}, { "VarName": "ingress_l4_src_port_M0_set_ingress_src_port_range_id_ALU1_stage1", "X": 1}, { "VarName": "ingress_l4_src_port_M1", "X": 2}, { "VarName": "ingress_l4_src_port_M1_set_ingress_src_port_range_id_ALU1", "X": 1}, { "VarName": "ingress_l4_src_port_M1_set_ingress_src_port_range_id_ALU1_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M0", "X": 2}, { "VarName": "ipv4_multicast_bridge_M0_multicast_bridge_s_g_hit_ALU1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M0_multicast_bridge_s_g_hit_ALU1_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M0_multicast_bridge_s_g_hit_ALU2", "X": 1}, { "VarName": "ipv4_multicast_bridge_M0_multicast_bridge_s_g_hit_ALU2_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M1", "X": 2}, { "VarName": "ipv4_multicast_bridge_M1_multicast_bridge_s_g_hit_ALU1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M1_multicast_bridge_s_g_hit_ALU1_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M1_multicast_bridge_s_g_hit_ALU2", "X": 1}, { "VarName": "ipv4_multicast_bridge_M1_multicast_bridge_s_g_hit_ALU2_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M2", "X": 2}, { "VarName": "ipv4_multicast_bridge_M2_multicast_bridge_s_g_hit_ALU1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M2_multicast_bridge_s_g_hit_ALU1_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M2_multicast_bridge_s_g_hit_ALU2", "X": 1}, { "VarName": "ipv4_multicast_bridge_M2_multicast_bridge_s_g_hit_ALU2_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M3", "X": 2}, { "VarName": "ipv4_multicast_bridge_M3_multicast_bridge_s_g_hit_ALU1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M3_multicast_bridge_s_g_hit_ALU1_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M3_multicast_bridge_s_g_hit_ALU2", "X": 1}, { "VarName": "ipv4_multicast_bridge_M3_multicast_bridge_s_g_hit_ALU2_stage1", "X": 1}, { "VarName": "ipv4_multicast_route_M0", "X": 2}, { "VarName": "ipv4_multicast_route_M0_multicast_route_s_g_hit_0_ALU1_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M0_multicast_route_s_g_hit_0_ALU2_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M0_multicast_route_s_g_hit_0_ALU3_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M0_multicast_route_s_g_hit_0_ALU4_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M1", "X": 2}, { "VarName": "ipv4_multicast_route_M1_multicast_route_s_g_hit_0_ALU1_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M1_multicast_route_s_g_hit_0_ALU2_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M1_multicast_route_s_g_hit_0_ALU3_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M1_multicast_route_s_g_hit_0_ALU4_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M2", "X": 2}, { "VarName": "ipv4_multicast_route_M2_multicast_route_s_g_hit_0_ALU1_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M2_multicast_route_s_g_hit_0_ALU2_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M2_multicast_route_s_g_hit_0_ALU3_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M2_multicast_route_s_g_hit_0_ALU4_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M3", "X": 2}, { "VarName": "ipv4_multicast_route_M3_multicast_route_s_g_hit_0_ALU1_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M3_multicast_route_s_g_hit_0_ALU2_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M3_multicast_route_s_g_hit_0_ALU3_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M3_multicast_route_s_g_hit_0_ALU4_stage0", "X": 1}, { "VarName": "sampling_table_M0", "X": 2}, { "VarName": "sampling_table_M0_sampling_ALU1", "X": 1}, { "VarName": "sampling_table_M0_sampling_ALU1_stage1", "X": 1}, { "VarName": "sampling_table_M0_sampling_ALU2", "X": 2}, { "VarName": "sampling_table_M0_sampling_ALU2_stage2", "X": 1}, { "VarName": "ipv4_dest_vtep_M0_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M0_stage1", "X": 1}, { "VarName": "ipv4_dest_vtep_M0_stage2", "X": 1}, { "VarName": "ipv4_dest_vtep_M1_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M1_stage2", "X": 1}, { "VarName": "ipv4_dest_vtep_M2_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M2_stage2", "X": 1}, { "VarName": "ipv4_dest_vtep_M3_stage0", "X": 1}, { "VarName": "ipv4_dest_vtep_M3_stage2", "X": 1}, { "VarName": "ingress_l4_src_port_M0_stage1", "X": 1}, { "VarName": "ingress_l4_src_port_M1_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M0_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M0_stage2", "X": 1}, { "VarName": "ipv4_multicast_bridge_M1_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M1_stage2", "X": 1}, { "VarName": "ipv4_multicast_bridge_M2_stage1", "X": 1}, { "VarName": "ipv4_multicast_bridge_M2_stage2", "X": 1}, { "VarName": "ipv4_multicast_bridge_M3_stage1", "X": 1}, { "VarName": "ipv4_multicast_route_M0_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M1_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M2_stage0", "X": 1}, { "VarName": "ipv4_multicast_route_M3_stage0", "X": 1}, { "VarName": "sampling_table_M0_stage1", "X": 1}, { "VarName": "sampling_table_M0_stage2", "X": 1}, { "VarName": "s0_beg", "X": 1}, { "VarName": "s0_end", "X": 2}, { "VarName": "s0_stage1", "X": 1}, { "VarName": "x1", "X": 1}, { "VarName": "x2", "X": 1}, { "VarName": "x3", "X": 1}, { "VarName": "x4", "X": 1}, { "VarName": "x6", "X": 1}, { "VarName": "x8", "X": 1}, { "VarName": "x10", "X": 1}, { "VarName": "x12", "X": 1}, { "VarName": "x14", "X": 1}, { "VarName": "x16", "X": 1}, { "VarName": "x18", "X": 1}, { "VarName": "x20", "X": 1}, { "VarName": "x22", "X": 1}]}
-    
+ ILP_alloc):    
     tmp_pkt_pos_dic = {} #key: tmp field name, value: the position they are put
     # update_var_dic = {'T1_A1_ALU1' : 1,
     #             'T1_A1_ALU2' : 2,
@@ -175,13 +115,17 @@ match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, u
         action_name = state_var_op_dic[stateful_var][0][1]
         alu_name = state_var_op_dic[stateful_var][0][2]
         var_name = table_name + "_M0_" +  action_name + "_" + alu_name
-        stateful_alu_stage = var_val_dict[var_name]
+        if var_name in var_val_dict:
+            stateful_alu_stage = var_val_dict[var_name]
+        else:
+            stateful_alu_stage = 0
 
         state_var_pos_dic[stateful_var] = stage_dic[stateful_alu_stage]
         stage_dic[stateful_alu_stage] += 1
         # print("var_name =",var_name,"stateful_alu_stage=",stateful_alu_stage)
     
-    print("state_var_pos_dic =",state_var_pos_dic)
+    # print("state_var_pos_dic =",state_var_pos_dic)
+    # exit(0)
 
     num_of_pkts_in_def = len(pkt_fields_def)
     pkt_container_dic = {} # key: pkt_field, val: container idx
@@ -190,7 +134,7 @@ match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, u
         pkt_container_dic[tmp_field] = tmp_pkt_pos_dic[tmp_field]
     for state_var in state_var_pos_dic:
         pkt_container_dic[state_var] = state_var_pos_dic[state_var]
-    print("pkt_container_dic =", pkt_container_dic)
+    
     out_str = ""
     # Parse and Deparser (DONE)
     # Part I
@@ -216,7 +160,7 @@ match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, u
             tmp_str += "000000000000000000000000"
     out_str += tmp_str + "\n"
     # print(out_str)
-    
+    print("pkt_container_dic =", pkt_container_dic)
     
     used_table_dict = {} # key: stage number; val: list of tables appear in that stage
     used_table_dict = gen_table_stage_alloc(var_val_dict, table_match_part_dic, cost)
@@ -288,6 +232,7 @@ match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, u
             
             
             ram_list = ["0000000000000000000000000000000000000000000000000000000000000000"] * 65
+            print("alu_l =", alu_l)
             for k in range(table_match_part_dic[table_name]):
                 for alu in alu_l:
                     var_name = "%s_M%s_%s_%s" % (table_name, k, action_name, alu)
@@ -300,13 +245,19 @@ match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, u
                     # if one particular alu is allocated in this stage, we should set the configuration
                     if stage_of_this_alu == i:
                         # find which packet field is modified by this alu
+                        print("-------------------")
+                        print("table_name =", table_name)
+                        print("action_name =", action_name)
+                        print("alu =", alu)
+                        print("pkt_alu_dic =", pkt_alu_dic)
                         packet_field = get_modified_pkt(table_name, action_name, alu, pkt_alu_dic)
-                        if var_name == "stateful_fw_table_M0_stateful_fw_ALU0":
-                            print("packet_field =", packet_field)
                         if packet_field == -1:
                             # TODO: consider the case where the ALU is used to modify tmp field/stateful vars
                             variable_name = table_name + "_" + action_name + "_" + alu
                             print("variable_name =", variable_name)
+                            print("update_state_dic =", update_state_dic)
+                            if variable_name not in update_state_dic:
+                                continue
                             assert variable_name in update_state_dic ,"Not modify fields in definition"
                             # print("stage_dic =",stage_dic)
                             # print("variable_name =", variable_name)
@@ -323,6 +274,8 @@ match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, u
                             ram_list[num_of_phv - 1 - state_var_pos_dic[corresponding_state_name]] = tmp_str
                             stage_dic[i] += 1
                         else:
+                            packet_field = clean_operand(packet_field)
+                            print("packet_field =", packet_field)
                             alu_func_name = "%s_%s_%s" % (table_name, action_name, alu)
                             # print("alu_func_name =", alu_func_name)
                             if alu_func_name in update_state_dic:
@@ -342,6 +295,7 @@ match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, u
                                     int_to_bin_str(immediate_operand, 50)
                             elif opcode == 2:
                                 operand0 = update_val_dict['operand0']
+                                operand0 = clean_operand(operand0)
                                 immediate_operand = update_val_dict['immediate_operand']
                                 tmp_str = "00001001" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(immediate_operand, 50)
                             elif opcode == 12:
@@ -350,37 +304,49 @@ match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, u
                                 # operand0 < operand1
                                 operand0 = update_val_dict['operand0']
                                 operand1 = update_val_dict['operand1']
+                                operand0 = clean_operand(operand0)
+                                operand1 = clean_operand(operand1)
                                 tmp_str = "00011100" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(pkt_container_dic[operand1], 6) + int_to_bin_str(0, 44)
                             elif opcode == 13:
                                 operand0 = update_val_dict['operand0']
+                                operand0 = clean_operand(operand0)
                                 immediate_operand = update_val_dict['immediate_operand']
                                 tmp_str = "00011101" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(immediate_operand, 50)
                             elif opcode == 18:
                                 operand0 = update_val_dict['operand0']
                                 operand1 = update_val_dict['operand1']
+                                operand0 = clean_operand(operand0)
+                                operand1 = clean_operand(operand1)
                                 tmp_str = "00010011" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(pkt_container_dic[operand1], 6) + int_to_bin_str(0, 44)
                             elif opcode == 20:
                                 operand0 = update_val_dict['operand0']
+                                operand0 = clean_operand(operand0)
                                 tmp_str = "00000101" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(0, 50)
                             elif opcode == 9:
                                 # return (pkt_0 == immediate_operand);
                                 operand0 = update_val_dict['operand0']
+                                operand0 = clean_operand(operand0)
                                 immediate_operand = update_val_dict['immediate_operand']
                                 tmp_str = "00010111" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(immediate_operand, 50)
                             elif opcode == 15:
                                 operand0 = update_val_dict['operand0']
                                 operand1 = update_val_dict['operand1']
+                                operand0 = clean_operand(operand0)
+                                operand1 = clean_operand(operand1)
                                 immediate_operand = update_val_dict['immediate_operand']
                                 tmp_str = "00010001" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(pkt_container_dic[operand1], 6) + int_to_bin_str(immediate_operand, 44)
                             elif opcode == 10:
                                 #return (pkt_0 >= pkt_1);
                                 operand0 = update_val_dict['operand0']
                                 operand1 = update_val_dict['operand1']
+                                operand0 = clean_operand(operand0)
+                                operand1 = clean_operand(operand1)
                                 tmp_str = "00011000" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(pkt_container_dic[operand1], 6) + int_to_bin_str(0, 44)
                                 print("opcode == 10")
                             elif opcode == 4:
                                 #return pkt_0 - immediate_operand;
                                 operand0 = update_val_dict['operand0']
+                                operand0 = clean_operand(operand0)
                                 immediate_operand = update_val_dict['immediate_operand']
                                 tmp_str = "00000011" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(immediate_operand, 50)
                             elif opcode == 14:
@@ -388,19 +354,26 @@ match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, u
                                 operand0 = update_val_dict['operand0']
                                 operand1 = update_val_dict['operand1']
                                 operand2 = update_val_dict['operand2']
+                                operand0 = clean_operand(operand0)
+                                operand1 = clean_operand(operand1)
+                                operand2 = clean_operand(operand2)
                                 tmp_str = "00010000" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(pkt_container_dic[operand1], 6) + int_to_bin_str(pkt_container_dic[operand2], 6) + int_to_bin_str(0, 38)
                             elif opcode >= 20:
                                 # return (pkt_0 == 0);
                                 operand0 = update_val_dict['operand0']
+                                operand0 = clean_operand(operand0)
                                 tmp_str = "00010111" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(0, 50)
                             elif opcode == 1:
                                 #return pkt_0 + pkt_1;
                                 operand0 = update_val_dict['operand0']
                                 operand1 = update_val_dict['operand1']
+                                operand0 = clean_operand(operand0)
+                                operand1 = clean_operand(operand1)
                                 tmp_str = "00000001" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(pkt_container_dic[operand1], 6) + int_to_bin_str(pkt_container_dic[operand2], 6) + int_to_bin_str(0, 38)
                             elif opcode == 7:
                                 #return (pkt_0 != immediate_operand);
                                 operand0 = update_val_dict['operand0']
+                                operand0 = clean_operand(operand0)
                                 immediate_operand = update_val_dict['immediate_operand']
                                 tmp_str = "00000101" + int_to_bin_str(pkt_container_dic[operand0], 6) + int_to_bin_str(immediate_operand, 50)
                             else:
