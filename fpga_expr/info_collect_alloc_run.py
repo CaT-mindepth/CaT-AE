@@ -80,6 +80,10 @@ def get_match_action_rule(match_act_file_name):
     return ret_dic
 
 def main(argv):
+    if len(argv) != 2:
+        print("Usage: python3", argv[0], "<Domino program name>")
+        exit(1)
+    domino_program_name = argv[1]
     filename = "/tmp/output_from_p4c.txt"
     # collect all table names
     f = open(filename, 'r')
@@ -160,7 +164,8 @@ def main(argv):
                     pkt_name = line.split(' ')[1]
                     pkt_fields_def.append(pkt_name)
     f.close()
-    f = open("/home/xiangyug/CaT-AE/p4_input_program/sampling.json", 'r')
+    json_filename = "/home/xiangyug/CaT-AE/p4_input_program/" + domino_program_name + ".json"
+    f = open(json_filename, 'r')
     contents = f.read()
     table_info = json.loads(contents)
 
@@ -292,7 +297,7 @@ def main(argv):
         'pkt_5':[['ingress_l4_src_port','set_ingress_src_port_range_id','ALU1']]
     }
     '''
-    match_action_filename = "/home/xiangyug/CaT-AE/p4_input_program/sampling_match_action.txt"
+    match_action_filename = "/home/xiangyug/CaT-AE/p4_input_program/" + domino_program_name + "_match_action.txt"
     match_action_rule = {} # Get from match action rule file
     match_action_rule = get_match_action_rule(match_action_filename)
     # print("match_action_rule =", match_action_rule)
