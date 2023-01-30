@@ -1,4 +1,5 @@
 import ILP_solver
+import fpga_conf_gen
 
 import sys
 import json
@@ -48,6 +49,35 @@ def find_actions(s):
             action_list.append(action_name)
     return action_list
 
+def get_match_action_rule(match_act_file_name):
+    ret_dic = {} # It should have the format {"sampling_table": [({'pkt_0' : 5}, 'sampling')]}
+    f = open(match_act_file_name, 'r')
+    while 1:
+        # Table: sampling
+        # Fields: sample_key
+        # Values: 5
+        # Action: set_pkt
+        line1 = f.readline()
+        if not line1:
+            break
+        line2 = f.readline()
+        line3 = f.readline()
+        line4 = f.readline()
+        table_name = line1.strip().split(' ')[-1]
+        match_field = line2.strip().split(' ')[-1]
+        match_value = int(line3.strip().split(' ')[-1])
+        action_name = line4.strip().split(' ')[-1]
+        if table_name not in ret_dic:
+            ret_dic[table_name] = []
+        match_key_value_dict = {}
+        # Right now, we only support one match key
+        # TODO: support multiple match keys
+        match_key_value_dict[match_field] = match_value
+        new_tuple = (match_key_value_dict, action_name)
+        ret_dic[table_name].append(new_tuple)
+    f.close()
+    return ret_dic
+
 def main(argv):
     filename = "/tmp/output_from_p4c.txt"
     # collect all table names
@@ -66,6 +96,8 @@ def main(argv):
     action_dep = []
     reverse_dep = []
     successor_dep = []
+
+    match_field_dic = {} # key: table name, value: field as the match keys
 
     while True:
         line = f.readline()
@@ -120,6 +152,7 @@ def main(argv):
                     act_of_table = find_actions(line_v)
                     table_size_dic[table_name] = table_size
                     table_act_dic[table_name] = act_of_table
+                    match_field_dic[table_name] = key_name_l
             elif struct_info_flag == 1:
                 # For now, we assume all variables are bit<32>
                 if line.find("bit<") != -1:
@@ -216,7 +249,7 @@ def main(argv):
                         l = [table, action, "ALU"+str(id)]
                         state_alu_dic[stateful_var].append(l)
 
-    # print("state_alu_dic =", state_alu_dic)
+    print("state_alu_dic =", state_alu_dic)
     # print("alu_dep_dic =", alu_dep_dic)
     # print("table_size_dic =", table_size_dic)
     # print("table_act_dic =", table_act_dic)
@@ -230,10 +263,86 @@ def main(argv):
 
     # Use ILP solver to solve the integer linear programming problem
     opt = True # Set ILP with Gurobi in optimal mode as the default
-    ILP_solver.solve_ILP(pkt_fields_def, tmp_fields_def, stateful_var_def, 
+    ILP_alloc = ILP_solver.solve_ILP(pkt_fields_def, tmp_fields_def, stateful_var_def, 
     table_act_dic, table_size_dic, action_alu_dic, alu_dep_dic,
     pkt_alu_dic, tmp_alu_dic, state_alu_dic,
     match_dep, action_dep, successor_dep, reverse_dep, opt)
+    ILP_alloc_solution = json.loads(ILP_alloc)
+    # print(ILP_alloc_solution['Vars'])
+    '''
+    **************** FPGA conf gen elements ****************
+    DONE pkt_fields_def = ['pkt_0','pkt_1','pkt_2','pkt_3','pkt_4','pkt_5','pkt_6','pkt_7','pkt_8','pkt_9','pkt_10','pkt_11','pkt_12','pkt_13','pkt_14','pkt_15','pkt_16']
+    DONE tmp_fields_def = [] # all temporary variables
+    DONE stateful_var_def = ['s0'] # all stateful variables
+    DONE table_act_dic = {'ipv4_dest_vtep':['set_tunnel_termination_flag','set_tunnel_vni_and_termination_flag'],
+                    'sampling_table': ['sampling']}
+    DONE table_size_dic = {'ipv4_dest_vtep':1024,'sampling_table':1}
+    DONE match_field_dic = {'ipv4_dest_vtep' : ['pkt_2','pkt_3','pkt_4'],
+                        'sampling_table': ['pkt_0']}
+    DONE match_action_rule = {"sampling_table": [({'pkt_0' : 5}, 'sampling')]}
+    DONE tmp_alu_dic = {} #key: tmp packet fields, val: a list of list of size 3, [['table name', 'action name', 'alu name']]
+    DONE state_var_op_dic = {'s0':[['sampling_table','sampling','ALU1']]}
+    DONE action_alu_dic = {'ipv4_dest_vtep': {'set_tunnel_termination_flag':['ALU1'],
+                        'sampling_table': {'sampling':['ALU1','ALU2']}
+                        }
+    DONE pkt_alu_dic = {
+        'pkt_0':[['ipv4_dest_vtep','set_tunnel_termination_flag','ALU1'],['ipv4_dest_vtep','set_tunnel_vni_and_termination_flag','ALU2']],
+        'pkt_1':[['ipv4_dest_vtep','set_tunnel_vni_and_termination_flag','ALU1'],['sampling_table','sampling','ALU2']],
+        'pkt_5':[['ingress_l4_src_port','set_ingress_src_port_range_id','ALU1']]
+    }
+    '''
+    match_action_filename = "/home/xiangyug/CaT-AE/p4_input_program/sampling_match_action.txt"
+    match_action_rule = {} # Get from match action rule file
+    match_action_rule = get_match_action_rule(match_action_filename)
+    # print("match_action_rule =", match_action_rule)
+
+    state_var_op_dic = {} # For now, let's assume that this is a dictionary recording which ALU modifies key stateful var
+    for var in stateful_var_def:
+        modify_alu_l = state_alu_dic[var][0]
+        state_var_op_dic[var] = [modify_alu_l]
+    # print("state_var_op_dic =", state_var_op_dic)
+    
+    update_var_dic = {} # Get from sampling.json file
+    for table in table_size_dic:
+        for action in table_act_dic[table]:
+            for alu in stateless_alu_l:
+                id = int(alu["id"])
+                ALU_name = table + "_" + action + "_ALU" + str(id)
+                update_var_dic[ALU_name] = {}
+                opcode = int(alu["opcode"])
+                update_var_dic[ALU_name]["opcode"] = opcode
+                operand0 = alu["operand0"]
+                update_var_dic[ALU_name]["operand0"] = operand0
+                operand1 = alu["operand1"]
+                update_var_dic[ALU_name]["operand1"] = operand1
+                operand2 = alu["operand2"]
+                update_var_dic[ALU_name]["operand2"] = operand2
+                immediate_operand = int(alu["immediate_operand"])
+                update_var_dic[ALU_name]["immediate_operand"] = immediate_operand
+    print("update_var_dic =", update_var_dic)
+    '''
+    DONE update_var_dic = {
+        'ipv4_multicast_route_multicast_route_s_g_hit_0_ALU4':{"opcode": 2, "operand0": "pkt_16", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 0},
+    }
+    update_state_dic = {
+        'sampling_table_sampling_ALU1':"00001100"+"000000"+"000000"+"000000"+"01110100000000000101011001011000000000",
+    }
+    '''
+    update_state_dic = {} # Get from code gen's json file
+    for table in table_size_dic:
+        for action in table_act_dic[table]:
+            for alu in stateful_alu_l:
+                id = int(alu["id"])
+                ALU_name = table + "_" + action + "_ALU" + str(id)
+                #TODO: get stateful_alu_string
+                stateful_alu_string = "00001100"+"000000"+"000000"+"000000"+"01110100000000000101011001011000000000"
+                update_state_dic[ALU_name] = stateful_alu_string
+    print("update_state_dic =", update_state_dic)
+
+    fpga_conf_gen.text_gen(pkt_fields_def, tmp_fields_def, stateful_var_def, table_act_dic, table_size_dic, match_field_dic,
+match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, update_var_dic, update_state_dic,
+ ILP_alloc_solution)
+
 
 if __name__ == '__main__':
     main(sys.argv)
