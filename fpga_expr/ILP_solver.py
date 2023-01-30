@@ -310,5 +310,6 @@ def solve_ILP(pkt_fields_def, tmp_fields_def, stateful_var_def,
                 print('Total number of stages used is %g (zero index)' % v.x)
         # print("************************************************")
         # print(m.getJSONSolution())
+        return m.getJSONSolution()        
     else:
         print("Sad")
