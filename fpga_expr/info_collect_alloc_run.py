@@ -37,7 +37,8 @@ DONE tmp_alu_dic = {'tmp_0':[['T2','A1','ALU2'],['T2','A1','ALU7']],
 def find_key_name(l):
     for i in range(len(l)):
         if l[i] == 'key' and l[i + 1] == 'is':
-            return l[i + 2]
+            # return l[i + 2].split('.')[-1]
+            return l[i + 2].split(';')[0].split('.')[-1]
 '''Find all actions for table with the format: table action list is { set_pkt; }'''
 def find_actions(s):
     action_list = []
