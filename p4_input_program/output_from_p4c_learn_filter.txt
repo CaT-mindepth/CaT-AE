@@ -1,0 +1,70 @@
+=====================Struct and Header Info========================
+Struct name is headers
+
+Struct name is metadata
+member variable name is learn_filter_key
+bit<32> learn_filter_key whose size is 32 bits 
+member variable name is member
+bit<32> member whose size is 32 bits 
+
+=====================Table Info========================
+table name is learn_filter
+no. 1 key is meta.learn_filter_key; with match type exact;
+table size is 1
+table action list is { set_pkt; }
+
+=====================Control Block Info========================
+prepare to output control
+control block name is MyVerifyChecksum
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is ingress
+control block body is { learn_filter.apply(); }
+control->body->components.size() = 1
+Balabala
+prepare to output control
+control block name is egress
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is MyComputeChecksum
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is MyDeparser
+control block body is { }
+control->body->components.size() = 0
+Balabala
+=====================Action Info========================
+This is an atomic construct
+value_str =   first_filter.read
+value_str =   second_filter.read
+value_str =   third_filter.read
+value_str =   first_filter.write
+value_str =   second_filter.write
+value_str =   third_filter.write
+Domino program = 
+struct Packet {
+int member;
+};
+int first_filter;
+int second_filter;
+int third_filter;
+void func(struct Packet pkt) {
+{ if (first_filter != 0 && second_filter != 0 && third_filter != 0) {
+    { pkt.member = 1; }
+  } else {
+    { pkt.member = 0; } }
+  first_filter = 1;
+  second_filter = 1;
+  third_filter = 1; }}
+
+Control block name is MyVerifyChecksum
+Control block name is ingress
+Control block name is egress
+Control block name is MyComputeChecksum
+Control block name is MyDeparser

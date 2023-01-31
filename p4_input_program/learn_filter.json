@@ -1,0 +1,111 @@
+{
+    "num_pipeline_stages": 3,
+    "alu_dependencies": [
+        [
+            0,
+            4
+        ],
+        [
+            0,
+            5
+        ],
+        [
+            1,
+            5
+        ],
+        [
+            2,
+            4
+        ],
+        [
+            3,
+            4
+        ],
+        [
+            4,
+            5
+        ]
+    ],
+    "stateful_alus": [
+        {
+            "inputs": [
+                "second_filter"
+            ],
+            "outputs": [
+                "pkt_second_filter00",
+                "second_filter"
+            ],
+            "id": 0,
+            "body": [
+                "void salu (int state_0_0, int pkt_0, ref int[2] _out0)/*comp_0_..ateful.sk:132*/\n",
+                "{\n",
+                "  _out0 = ((int[2])0);\n",
+                "  _out0[0] = 1;\n",
+                "  _out0[1] = state_0_0;\n"
+            ]
+        },
+        {
+            "inputs": [
+                "first_filter"
+            ],
+            "outputs": [
+                "pkt_first_filter00",
+                "first_filter"
+            ],
+            "id": 1,
+            "body": [
+                "void salu (int state_0_0, int pkt_0, ref int[2] _out0)/*comp_1_..ateful.sk:132*/\n",
+                "{\n",
+                "  _out0 = ((int[2])0);\n",
+                "  _out0[0] = 1;\n",
+                "  _out0[1] = state_0_0;\n"
+            ]
+        },
+        {
+            "inputs": [
+                "third_filter"
+            ],
+            "outputs": [
+                "pkt_third_filter00",
+                "third_filter"
+            ],
+            "id": 2,
+            "body": [
+                "void salu (int state_0_0, int pkt_0, ref int[2] _out0)/*comp_2_..ateful.sk:132*/\n",
+                "{\n",
+                "  _out0 = ((int[2])0);\n",
+                "  _out0[0] = 1;\n",
+                "  _out0[1] = state_0_0;\n"
+            ]
+        }
+    ],
+    "stateless_alus": [
+        {
+            "id": 3,
+            "opcode": 8,
+            "operand0": "pkt_member",
+            "operand1": "pkt_member",
+            "operand2": "pkt_member",
+            "result": "_out_s17",
+            "immediate_operand": "0"
+        },
+        {
+            "id": 4,
+            "opcode": 18,
+            "operand0": "pkt_second_filter00",
+            "operand1": "pkt_third_filter00",
+            "operand2": "_out_s17",
+            "result": "_out_s17_0",
+            "immediate_operand": "1"
+        },
+        {
+            "id": 5,
+            "opcode": 18,
+            "operand0": "_out_s17_0",
+            "operand1": "pkt_first_filter00",
+            "operand2": "pkt_second_filter00",
+            "result": "pkt_member1",
+            "immediate_operand": "30"
+        }
+    ]
+}
