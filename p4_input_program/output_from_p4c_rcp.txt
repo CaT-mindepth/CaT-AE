@@ -1,0 +1,71 @@
+=====================Struct and Header Info========================
+Struct name is headers
+
+Struct name is metadata
+member variable name is rcp_key
+bit<32> rcp_key whose size is 32 bits 
+member variable name is rtt
+bit<32> rtt whose size is 32 bits 
+member variable name is size_bytes
+bit<32> size_bytes whose size is 32 bits 
+
+=====================Table Info========================
+table name is rcp
+no. 1 key is meta.rcp_key; with match type exact;
+table size is 1
+table action list is { set_pkt; }
+
+=====================Control Block Info========================
+prepare to output control
+control block name is MyVerifyChecksum
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is ingress
+control block body is { rcp.apply(); }
+control->body->components.size() = 1
+Balabala
+prepare to output control
+control block name is egress
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is MyComputeChecksum
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is MyDeparser
+control block body is { }
+control->body->components.size() = 0
+Balabala
+=====================Action Info========================
+This is an atomic construct
+value_str =   input_traffic_Bytes.read
+value_str =   sum_rtt_Tr.read
+value_str =   num_pkts_with_rtt.read
+value_str =   input_traffic_Bytes.write
+value_str =   sum_rtt_Tr.write
+value_str =   num_pkts_with_rtt.write
+Domino program = 
+struct Packet {
+int rtt;
+int size_bytes;
+};
+int input_traffic_Bytes;
+int input_traffic_Bytes;
+int num_pkts_with_rtt;
+int sum_rtt_Tr;
+void func(struct Packet pkt) {
+{ input_traffic_Bytes = input_traffic_Bytes + pkt.size_bytes;
+  if (pkt.rtt < 30) {
+    { sum_rtt_Tr = sum_rtt_Tr + pkt.rtt;
+      num_pkts_with_rtt = num_pkts_with_rtt + 1; } } }}
+
+Control block name is MyVerifyChecksum
+Control block name is ingress
+Control block name is egress
+Control block name is MyComputeChecksum
+Control block name is MyDeparser

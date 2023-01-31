@@ -1,0 +1,68 @@
+=====================Struct and Header Info========================
+Struct name is headers
+
+Struct name is metadata
+member variable name is blue_increase_key
+bit<32> blue_increase_key whose size is 32 bits 
+member variable name is now_plus_free
+bit<32> now_plus_free whose size is 32 bits 
+member variable name is now
+bit<32> now whose size is 32 bits 
+
+=====================Table Info========================
+table name is blue_increase
+no. 1 key is meta.blue_increase_key; with match type exact;
+table size is 1
+table action list is { set_pkt; }
+
+=====================Control Block Info========================
+prepare to output control
+control block name is MyVerifyChecksum
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is ingress
+control block body is { blue_increase.apply(); }
+control->body->components.size() = 1
+Balabala
+prepare to output control
+control block name is egress
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is MyComputeChecksum
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is MyDeparser
+control block body is { }
+control->body->components.size() = 0
+Balabala
+=====================Action Info========================
+This is an atomic construct
+value_str =   last_update.read
+value_str =   p_mark.read
+value_str =   last_update.write
+value_str =   p_mark.write
+Domino program = 
+struct Packet {
+int now;
+int now_plus_free;
+};
+int last_update;
+int last_update;
+int p_mark;
+void func(struct Packet pkt) {
+{ pkt.now_plus_free = pkt.now - 10;
+  if (pkt.now_plus_free > last_update) {
+    { p_mark = p_mark + 1;
+      last_update = pkt.now; } } }}
+
+Control block name is MyVerifyChecksum
+Control block name is ingress
+Control block name is egress
+Control block name is MyComputeChecksum
+Control block name is MyDeparser
