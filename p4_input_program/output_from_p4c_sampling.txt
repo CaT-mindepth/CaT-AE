@@ -1,0 +1,63 @@
+=====================Struct and Header Info========================
+Struct name is headers
+
+Struct name is metadata
+member variable name is sample_key
+bit<32> sample_key whose size is 32 bits 
+member variable name is sample
+bit<32> sample whose size is 32 bits 
+
+=====================Table Info========================
+table name is sampling
+no. 1 key is meta.sample_key; with match type exact;
+table size is 1
+table action list is { set_pkt; }
+
+=====================Control Block Info========================
+prepare to output control
+control block name is MyVerifyChecksum
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is ingress
+control block body is { sampling.apply(); }
+control->body->components.size() = 1
+Balabala
+prepare to output control
+control block name is egress
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is MyComputeChecksum
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is MyDeparser
+control block body is { }
+control->body->components.size() = 0
+Balabala
+=====================Action Info========================
+This is an atomic construct
+value_str =   count.read
+value_str =   count.write
+Domino program = 
+struct Packet {
+int sample;
+};
+int count;
+void func(struct Packet pkt) {
+{ if (count == 29) {
+    { pkt.sample = 1;
+      count = 0; }
+  } else {
+    { pkt.sample = 0;
+      count = count + 1; } } }}
+
+Control block name is MyVerifyChecksum
+Control block name is ingress
+Control block name is egress
+Control block name is MyComputeChecksum
+Control block name is MyDeparser
