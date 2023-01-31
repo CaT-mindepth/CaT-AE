@@ -263,6 +263,8 @@ def solve_ILP(pkt_fields_def, tmp_fields_def, stateful_var_def,
                 m.addGenConstrIndicator(new_var1, False, end_var <= i)
                 m.addConstr(stage_var == new_var1 * new_var)
                 global_cnt += 1
+            m.addConstr(cost >= beg_var)
+            m.addConstr(cost >= end_var - 1)
 
     m.update()
     if len(tmp_state_field_loc_vec) > 0:
