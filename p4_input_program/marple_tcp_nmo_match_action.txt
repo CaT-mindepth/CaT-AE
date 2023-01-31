@@ -1,0 +1,4 @@
+Table: marple_tcp_nmo
+Fields: marple_tcp_nmo_key
+Values: 5
+Action: set_pkt

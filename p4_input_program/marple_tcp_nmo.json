@@ -1,0 +1,97 @@
+{
+    "num_pipeline_stages": 3,
+    "alu_dependencies": [
+        [
+            0,
+            4
+        ],
+        [
+            2,
+            4
+        ],
+        [
+            3,
+            4
+        ],
+        [
+            4,
+            1
+        ]
+    ],
+    "stateful_alus": [
+        {
+            "inputs": [
+                "maxseq",
+                "pkt_tcpseq"
+            ],
+            "outputs": [
+                "pkt_maxseq00",
+                "maxseq"
+            ],
+            "id": 0,
+            "body": [
+                "void salu (int state_0_0, int pkt_0, int pkt_1, ref int[2] _out0)/*comp_0_..ateful.sk:131*/\n",
+                "{\n",
+                "  _out0 = ((int[2])0);\n",
+                "  int state_0 = state_0_0;\n",
+                "  if(state_0_0 < pkt_0)/*comp_0_..ateful.sk:133*/\n",
+                "  {\n",
+                "    state_0 = pkt_0;\n",
+                "  }\n",
+                "  _out0[0] = state_0;\n",
+                "  _out0[1] = state_0_0;\n"
+            ]
+        },
+        {
+            "inputs": [
+                "count",
+                "pkt__br_tmp1"
+            ],
+            "outputs": [
+                "count"
+            ],
+            "id": 1,
+            "body": [
+                "void salu (int state_0_0, int pkt_0, int pkt_1, ref int[2] _out0)/*comp_1_..ateful.sk:131*/\n",
+                "{\n",
+                "  _out0 = ((int[2])0);\n",
+                "  int state_0 = state_0_0;\n",
+                "  if(0 < pkt_0)/*comp_1_..ateful.sk:133*/\n",
+                "  {\n",
+                "    state_0 = state_0_0 + 1;\n",
+                "  }\n",
+                "  _out0[0] = state_0;\n",
+                "  _out0[1] = 0;\n"
+            ]
+        }
+    ],
+    "stateless_alus": [
+        {
+            "id": 2,
+            "opcode": 2,
+            "operand0": "pkt_tcpseq",
+            "operand1": "pkt_tcpseq",
+            "operand2": "pkt_tcpseq",
+            "result": "_out_s16",
+            "immediate_operand": "1"
+        },
+        {
+            "id": 3,
+            "opcode": 4,
+            "operand0": "pkt_tcpseq",
+            "operand1": "pkt_tcpseq",
+            "operand2": "pkt_tcpseq",
+            "result": "_out_s16_0",
+            "immediate_operand": "3"
+        },
+        {
+            "id": 4,
+            "opcode": 10,
+            "operand0": "pkt_maxseq00",
+            "operand1": "_out_s16",
+            "operand2": "_out_s16_0",
+            "result": "pkt__br_tmp1",
+            "immediate_operand": "2"
+        }
+    ]
+}
