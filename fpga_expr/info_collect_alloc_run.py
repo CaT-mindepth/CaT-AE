@@ -238,7 +238,7 @@ def main(argv):
         for table in table_size_dic:
             for action in table_act_dic[table]:
                 for dic in stateful_alu_l:
-                    output_l = dic["outputs"]
+                    output_l = dic["input_state_0"]
                     if stateful_var in output_l:
                         id = dic["id"]
                         l = [table, action, "ALU"+str(id)]
