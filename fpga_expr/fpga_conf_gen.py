@@ -101,7 +101,10 @@ match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, u
             beg_stage = var_val_dict[beg_val]
         else:
             beg_stage = 0
-        end_stage = var_val_dict[end_val]
+        if end_val in var_val_dict:
+            end_stage = var_val_dict[end_val]
+        else:
+            end_stage = 0
         tmp_pkt_pos_dic[tmp_field] = stage_dic[beg_stage]
         # print("beg_stage =",beg_stage)
         # print("end_stage =",end_stage)
