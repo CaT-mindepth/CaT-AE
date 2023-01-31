@@ -1,0 +1,60 @@
+=====================Struct and Header Info========================
+Struct name is headers
+
+Struct name is metadata
+member variable name is marple_new_flow_key
+bit<32> marple_new_flow_key whose size is 32 bits 
+member variable name is new
+bit<32> new whose size is 32 bits 
+
+=====================Table Info========================
+table name is marple_new_flow
+no. 1 key is meta.marple_new_flow_key; with match type exact;
+table size is 1
+table action list is { set_pkt; }
+
+=====================Control Block Info========================
+prepare to output control
+control block name is MyVerifyChecksum
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is ingress
+control block body is { marple_new_flow.apply(); }
+control->body->components.size() = 1
+Balabala
+prepare to output control
+control block name is egress
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is MyComputeChecksum
+control block body is { }
+control->body->components.size() = 0
+Balabala
+prepare to output control
+control block name is MyDeparser
+control block body is { }
+control->body->components.size() = 0
+Balabala
+=====================Action Info========================
+This is an atomic construct
+value_str =   count.read
+value_str =   count.write
+Domino program = 
+struct Packet {
+int new;
+};
+int count;
+void func(struct Packet pkt) {
+{ if (count == 0) {
+    { count = 1;
+      pkt.new = 1; } } }}
+
+Control block name is MyVerifyChecksum
+Control block name is ingress
+Control block name is egress
+Control block name is MyComputeChecksum
+Control block name is MyDeparser

@@ -1,0 +1,4 @@
+Table: marple_new_flow
+Fields: marple_new_flow_key
+Values: 5
+Action: set_pkt
