@@ -1,0 +1,95 @@
+{
+    "num_pipeline_stages": 2,
+    "alu_dependencies": [
+        [
+            3,
+            0
+        ],
+        [
+            3,
+            1
+        ]
+    ],
+    "stateful_alus": [
+        {
+            "inputs": [
+                "sum_rtt_Tr",
+                "pkt__br_tmp1",
+                "pkt_rtt"
+            ],
+            "outputs": [
+                "sum_rtt_Tr"
+            ],
+            "id": 0,
+            "body": [
+                "void salu (int state_0_0, int pkt_0, int pkt_1, ref int[2] _out0)/*comp_0_..ateful.sk:131*/\n",
+                "{\n",
+                "  _out0 = ((int[2])0);\n",
+                "  int state_0 = state_0_0;\n",
+                "  if(0 < pkt_0)/*comp_0_..ateful.sk:133*/\n",
+                "  {\n",
+                "    state_0 = state_0_0 + pkt_1;\n",
+                "  }\n",
+                "  _out0[0] = state_0;\n",
+                "  _out0[1] = 0;\n"
+            ]
+        },
+        {
+            "inputs": [
+                "num_pkts_with_rtt",
+                "pkt__br_tmp1"
+            ],
+            "outputs": [
+                "num_pkts_with_rtt"
+            ],
+            "id": 1,
+            "body": [
+                "void salu (int state_0_0, int pkt_0, int pkt_1, ref int[2] _out0)/*comp_1_..ateful.sk:131*/\n",
+                "{\n",
+                "  _out0 = ((int[2])0);\n",
+                "  int state_0 = state_0_0;\n",
+                "  if(0 == pkt_1)/*comp_1_..ateful.sk:133*/\n",
+                "  {\n",
+                "    state_0 = state_0_0 + pkt_0;\n",
+                "  }\n",
+                "  _out0[0] = state_0;\n",
+                "  _out0[1] = 0;\n"
+            ]
+        },
+        {
+            "inputs": [
+                "input_traffic_Bytes",
+                "pkt_size_bytes"
+            ],
+            "outputs": [
+                "input_traffic_Bytes",
+                "pkt_input_traffic_Bytes01",
+                "pkt_input_traffic_Bytes00"
+            ],
+            "id": 2,
+            "body": [
+                "void salu (int state_0_0, int pkt_0, int pkt_1, ref int[2] _out0)/*comp_2_..ateful.sk:131*/\n",
+                "{\n",
+                "  _out0 = ((int[2])0);\n",
+                "  int state_0 = state_0_0;\n",
+                "  if(0 == pkt_1)/*comp_2_..ateful.sk:133*/\n",
+                "  {\n",
+                "    state_0 = state_0_0 + pkt_0;\n",
+                "  }\n",
+                "  _out0[0] = state_0;\n",
+                "  _out0[1] = 0;\n"
+            ]
+        }
+    ],
+    "stateless_alus": [
+        {
+            "id": 3,
+            "opcode": 13,
+            "operand0": "pkt_rtt",
+            "operand1": "pkt_rtt",
+            "operand2": "pkt_rtt",
+            "result": "pkt__br_tmp1",
+            "immediate_operand": "30"
+        }
+    ]
+}
