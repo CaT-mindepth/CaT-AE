@@ -1,0 +1,301 @@
+{
+    "num_pipeline_stages": 4,
+    "alu_dependencies": [
+        [
+            0,
+            20
+        ],
+        [
+            2,
+            0
+        ],
+        [
+            3,
+            6
+        ],
+        [
+            4,
+            6
+        ],
+        [
+            5,
+            6
+        ],
+        [
+            6,
+            10
+        ],
+        [
+            7,
+            9
+        ],
+        [
+            8,
+            9
+        ],
+        [
+            9,
+            10
+        ],
+        [
+            10,
+            21
+        ],
+        [
+            11,
+            13
+        ],
+        [
+            12,
+            13
+        ],
+        [
+            13,
+            14
+        ],
+        [
+            14,
+            21
+        ],
+        [
+            15,
+            17
+        ],
+        [
+            16,
+            17
+        ],
+        [
+            17,
+            20
+        ],
+        [
+            18,
+            19
+        ],
+        [
+            19,
+            20
+        ],
+        [
+            20,
+            21
+        ]
+    ],
+    "stateful_alus": [
+        {
+            "inputs": [
+                "established",
+                "pkt__br_tmp3"
+            ],
+            "outputs": [
+                "established",
+                "pkt_established01"
+            ],
+            "id": 0,
+            "body": [
+                "void salu (int state_0_0, int pkt_0, int pkt_1, ref int[2] _out0)/*comp_0_..ateful.sk:131*/\n",
+                "{\n",
+                "  _out0 = ((int[2])0);\n",
+                "  int state_0 = state_0_0;\n",
+                "  if(0 < pkt_0)/*comp_0_..ateful.sk:133*/\n",
+                "  {\n",
+                "    state_0 = pkt_0;\n",
+                "  }\n",
+                "  _out0[0] = state_0;\n",
+                "  _out0[1] = state_0;\n"
+            ]
+        }
+    ],
+    "stateless_alus": [
+        {
+            "id": 1,
+            "opcode": 1,
+            "operand0": "pkt_src",
+            "operand1": "pkt_dst",
+            "operand2": "pkt_src",
+            "result": "pkt_array_index0",
+            "immediate_operand": "31"
+        },
+        {
+            "id": 2,
+            "opcode": 9,
+            "operand0": "pkt_src",
+            "operand1": "pkt_src",
+            "operand2": "pkt_src",
+            "result": "pkt__br_tmp3",
+            "immediate_operand": "20"
+        },
+        {
+            "id": 3,
+            "opcode": 14,
+            "operand0": "pkt_drop",
+            "operand1": "pkt_dst",
+            "operand2": "pkt_src",
+            "result": "_out_s29",
+            "immediate_operand": "8"
+        },
+        {
+            "id": 4,
+            "opcode": 29,
+            "operand0": "pkt_src",
+            "operand1": "pkt_src",
+            "operand2": "pkt_src",
+            "result": "_out_s29_0",
+            "immediate_operand": "5"
+        },
+        {
+            "id": 5,
+            "opcode": 20,
+            "operand0": "pkt_src",
+            "operand1": "pkt_drop",
+            "operand2": "pkt_drop",
+            "result": "_out_s29_1",
+            "immediate_operand": "0"
+        },
+        {
+            "id": 6,
+            "opcode": 17,
+            "operand0": "_out_s29",
+            "operand1": "_out_s29_0",
+            "operand2": "_out_s29_1",
+            "result": "_out_s19",
+            "immediate_operand": "31"
+        },
+        {
+            "id": 7,
+            "opcode": 7,
+            "operand0": "pkt_src",
+            "operand1": "pkt_drop",
+            "operand2": "pkt_drop",
+            "result": "_out_s29_2",
+            "immediate_operand": "20"
+        },
+        {
+            "id": 8,
+            "opcode": 4,
+            "operand0": "pkt_dst",
+            "operand1": "pkt_drop",
+            "operand2": "pkt_dst",
+            "result": "_out_s29_3",
+            "immediate_operand": "20"
+        },
+        {
+            "id": 9,
+            "opcode": 14,
+            "operand0": "_out_s29_2",
+            "operand1": "_out_s29_3",
+            "operand2": "pkt_src",
+            "result": "_out_s19_0",
+            "immediate_operand": "0"
+        },
+        {
+            "id": 10,
+            "opcode": 18,
+            "operand0": "_out_s19",
+            "operand1": "_out_s19_0",
+            "operand2": "pkt_drop",
+            "result": "_out_s19_1",
+            "immediate_operand": "0"
+        },
+        {
+            "id": 11,
+            "opcode": 29,
+            "operand0": "pkt_drop",
+            "operand1": "pkt_dst",
+            "operand2": "pkt_dst",
+            "result": "_out_s29_4",
+            "immediate_operand": "0"
+        },
+        {
+            "id": 12,
+            "opcode": 5,
+            "operand0": "pkt_drop",
+            "operand1": "pkt_drop",
+            "operand2": "pkt_drop",
+            "result": "_out_s29_5",
+            "immediate_operand": "20"
+        },
+        {
+            "id": 13,
+            "opcode": 15,
+            "operand0": "_out_s29_4",
+            "operand1": "_out_s29_5",
+            "operand2": "pkt_drop",
+            "result": "_out_s19_2",
+            "immediate_operand": "2"
+        },
+        {
+            "id": 14,
+            "opcode": 15,
+            "operand0": "_out_s19_2",
+            "operand1": "pkt_drop",
+            "operand2": "pkt_drop",
+            "result": "_out_s19_3",
+            "immediate_operand": "12"
+        },
+        {
+            "id": 15,
+            "opcode": 22,
+            "operand0": "pkt_drop",
+            "operand1": "pkt_drop",
+            "operand2": "pkt_src",
+            "result": "_out_s29_6",
+            "immediate_operand": "29"
+        },
+        {
+            "id": 16,
+            "opcode": 7,
+            "operand0": "pkt_dst",
+            "operand1": "pkt_drop",
+            "operand2": "pkt_src",
+            "result": "_out_s29_7",
+            "immediate_operand": "20"
+        },
+        {
+            "id": 17,
+            "opcode": 14,
+            "operand0": "_out_s29_6",
+            "operand1": "pkt_drop",
+            "operand2": "_out_s29_7",
+            "result": "_out_s19_4",
+            "immediate_operand": "1"
+        },
+        {
+            "id": 18,
+            "opcode": 11,
+            "operand0": "pkt_src",
+            "operand1": "pkt_src",
+            "operand2": "pkt_drop",
+            "result": "_out_s29_8",
+            "immediate_operand": "6"
+        },
+        {
+            "id": 19,
+            "opcode": 29,
+            "operand0": "_out_s29_8",
+            "operand1": "pkt_src",
+            "operand2": "pkt_drop",
+            "result": "_out_s19_5",
+            "immediate_operand": "0"
+        },
+        {
+            "id": 20,
+            "opcode": 31,
+            "operand0": "pkt_established01",
+            "operand1": "_out_s19_4",
+            "operand2": "_out_s19_5",
+            "result": "_out_s19_6",
+            "immediate_operand": "1"
+        },
+        {
+            "id": 21,
+            "opcode": 14,
+            "operand0": "_out_s19_1",
+            "operand1": "_out_s19_3",
+            "operand2": "_out_s19_6",
+            "result": "pkt_drop1",
+            "immediate_operand": "2"
+        }
+    ]
+}
