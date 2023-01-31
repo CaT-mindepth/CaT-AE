@@ -622,7 +622,7 @@ def main(argv):
     successor_dep = [['ipsg','ipsg_permit_special']]
     reverse_dep = [['storm_control','validate_packet'],['compute_ipv4_hashes','fwd_result'],['compute_ipv6_hashes','fwd_result'],['compute_non_ip_hashes','fwd_result'],['fabric_lag','system_acl']]
     if len(sys.argv) != 5:
-        print("Usage:", sys.argv[0], "<num_of_entries_per_table> <num_of_table_per_stage> <num_of_stages> <Gurobi or Z3>")
+        print("Usage:", sys.argv[0], "<num_of_entries_per_table> <num_of_table_per_stage> <num_of_stages> <Optimal or Feasible>")
         exit(1)
     num_of_entries_per_table = int(sys.argv[1])
     num_of_table_per_stage = int(sys.argv[2])
