@@ -203,6 +203,8 @@ def solve_ILP(pkt_fields_def, tmp_fields_def, stateful_var_def,
     for tmp_field in tmp_fields_def:
         beg_var = m.getVarByName("%s_beg" % tmp_field)
         end_var = m.getVarByName("%s_end" % tmp_field)
+        m.addConstr(cost >= beg_var)
+        m.addConstr(cost >= end_var - 1)
         for i in range(num_of_stages):
             # global global_cnt 
             new_var = m.addVar(name='x%s' % global_cnt, vtype=GRB.BINARY)
@@ -232,6 +234,9 @@ def solve_ILP(pkt_fields_def, tmp_fields_def, stateful_var_def,
         m.addConstr(beg_var <= num_of_stages - 1)
         m.addConstr(end_var >= 0)
         m.addConstr(end_var <= num_of_stages - 1)
+        m.addConstr(cost >= beg_var)
+        m.addConstr(cost >= end_var - 1)
+
 
         for j in range(len(state_alu_dic[state_var])):
             mem = state_alu_dic[state_var][j]
