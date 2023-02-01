@@ -1,1 +1,1 @@
-No new updates yet.
+ - Please make sure the `minDepthCompiler` (located at `~/workspace/cat_eval/minDepthCompiler`) branch used for artifact evaluation is the `weighted-grammar-final` branch: https://github.com/CaT-mindepth/minDepthCompiler/tree/weighted-grammar-parallel-final. 
