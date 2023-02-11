@@ -1,6 +1,6 @@
 import ILP_solver
 import fpga_conf_gen
-
+from ite_stateful_alu import to_bit_string
 import sys
 import json
 
@@ -84,7 +84,8 @@ def main(argv):
         print("Usage: python3", argv[0], "<Domino program name>")
         exit(1)
     domino_program_name = argv[1]
-    filename = "/tmp/output_from_p4c.txt"
+    # parse the output of p4c
+    filename = "../p4_input_program/output_from_p4c_"+domino_program_name+".txt"
     # collect all table names
     f = open(filename, 'r')
 
@@ -137,7 +138,7 @@ def main(argv):
                             domino_program += line
                     break
             action_info_flag = 0
-            print("Domino program =", domino_program)
+            # print("Domino program =", domino_program)
         elif line.find("Struct and Header Info") != -1:
             table_info_flag = 0
             action_info_flag = 0
@@ -164,7 +165,7 @@ def main(argv):
                     pkt_name = line.split(' ')[1]
                     pkt_fields_def.append(pkt_name)
     f.close()
-    json_filename = "/home/xiangyug/CaT-AE/p4_input_program/" + domino_program_name + ".json"
+    json_filename = "../p4_input_program/" + domino_program_name + ".json"
     f = open(json_filename, 'r')
     contents = f.read()
     table_info = json.loads(contents)
@@ -197,6 +198,7 @@ def main(argv):
                 ALU1 = "ALU" + str(edge[0])
                 ALU2 = "ALU" + str(edge[1])
                 alu_dep_dic[table][action].append([ALU1, ALU2])
+    # print(alu_dep_dic)
     # tmp_alu_dic = {'tmp_0':[['T2','A1','ALU2'],['T2','A1','ALU7']]
     # pkt_alu_dic = {'pkt_0':[['T1','A1','ALU1']]}
     # tmp_fields_def = ['tmp_0','tmp_1','tmp_2','tmp_3']
@@ -255,7 +257,7 @@ def main(argv):
                         l = [table, action, "ALU"+str(id)]
                         state_alu_dic[stateful_var].append(l)
 
-    print("state_alu_dic =", state_alu_dic)
+    # print("state_alu_dic =", state_alu_dic)
     # print("alu_dep_dic =", alu_dep_dic)
     # print("table_size_dic =", table_size_dic)
     # print("table_act_dic =", table_act_dic)
@@ -297,12 +299,13 @@ def main(argv):
         'pkt_5':[['ingress_l4_src_port','set_ingress_src_port_range_id','ALU1']]
     }
     '''
-    match_action_filename = "/home/xiangyug/CaT-AE/p4_input_program/" + domino_program_name + "_match_action.txt"
+    match_action_filename = "../p4_input_program/" + domino_program_name + "_match_action.txt"
     match_action_rule = {} # Get from match action rule file
     match_action_rule = get_match_action_rule(match_action_filename)
     # print("match_action_rule =", match_action_rule)
 
     state_var_op_dic = {} # For now, let's assume that this is a dictionary recording which ALU modifies key stateful var
+    # print("state_alu_dic =", state_alu_dic)
     for var in stateful_var_def:
         modify_alu_l = state_alu_dic[var][0]
         state_var_op_dic[var] = [modify_alu_l]
@@ -325,7 +328,7 @@ def main(argv):
                 update_var_dic[ALU_name]["operand2"] = operand2
                 immediate_operand = int(alu["immediate_operand"])
                 update_var_dic[ALU_name]["immediate_operand"] = immediate_operand
-    print("update_var_dic =", update_var_dic)
+    # print("update_var_dic =", update_var_dic)
     '''
     DONE update_var_dic = {
         'ipv4_multicast_route_multicast_route_s_g_hit_0_ALU4':{"opcode": 2, "operand0": "pkt_16", "operand1": "pkt_0", "operand2": "pkt_0", "immediate_operand": 0},
@@ -339,11 +342,107 @@ def main(argv):
         for action in table_act_dic[table]:
             for alu in stateful_alu_l:
                 id = int(alu["id"])
+                kind = alu["kind"]
+                input_state_0 = alu["input_state_0"]
+                input_pkt_1 = alu["input_pkt_1"]
+                input_pkt_2 = alu["input_pkt_2"]
+                output_state = alu["output_state"]
+                rel_op_dic = {}
+                state_0_truth_asgn_dic = {}
+                state_0_false_asgn_dic = {}
+                if kind == "if_else_raw" or kind == "pred_raw":
+                    rel_op_dic = alu["rel_op"]
+                    state_0_truth_asgn_dic = alu["state_0_truth_asgn"]
+                if kind == "if_else_raw":
+                    state_0_false_asgn_dic = alu["state_0_false_asgn"]
                 ALU_name = table + "_" + action + "_ALU" + str(id)
+                # "kind": "if_else_raw",
+                # "id": 0,
+                # "input_state_0": "count",
+                # "input_pkt_1": "0",
+                # "input_pkt_2": "0",
+                # "output_state": "read",
+                # "rel_op": {
+                #     "opcode": "==",
+                #     "lhs": "state_0",
+                #     "rhs": "29"
+                # },
+                # "state_0_truth_asgn": {
+                    #     "opcode": "eq",
+                    #     "operand": "pkt_1"
+                    # },
+                    # "state_0_false_asgn": {
+                    #     "opcode": "inc",
+                    #     "operand": "1"
+                    # }
+                
+                # Generate the output string for stateful alu
+                if output_state == "read":
+                    origin_or_updated = 'origin'
+                else:
+                    origin_or_updated = 'update'
+                if kind == "if_else_raw":
+                    if rel_op_dic["lhs"] == "state_0":
+                        sel_1 = 'state_1'
+                    else:
+                        sel_1 = '0'
+                    if state_0_truth_asgn_dic["opcode"] == "eq":
+                        sel_3 = '0'
+                    else:
+                        sel_3 = 'state_1'
+                    if state_0_false_asgn_dic["opcode"] == "eq":
+                        sel_5 = '0'
+                    else:
+                        sel_5 = 'state_1'
+                    rel_opcode = rel_op_dic["opcode"]
+                    # Set sel_2, sel_4, sel_6
+                    if rel_op_dic["rhs"].isnumeric():
+                        sel_2 = "cons"
+                    elif rel_op_dic["rhs"] == "pkt_1":
+                        sel_2 = "pkt_1"
+                    else:
+                        sel_2 = "pkt_2"
+                    if state_0_truth_asgn_dic["opcode"] == "eq":
+                        if state_0_truth_asgn_dic["operand"] == "pkt_1":
+                            sel_4 = "pkt_1"
+                        else:
+                            sel_4 = "pkt_2"
+                    else:
+                        sel_4 = "cons"    
+                    if state_0_false_asgn_dic["opcode"] == "eq":
+                        if state_0_false_asgn_dic["operand"] == "pkt_1":
+                            sel_6 = "pkt_1"
+                        else:
+                            sel_6 = "pkt_2"
+                    else:
+                        sel_6 = "cons"    
+                    if rel_op_dic["rhs"].isnumeric():
+                        cons_1 = int(rel_op_dic["rhs"])
+                    else:
+                        cons_1 = 0
+                    if state_0_truth_asgn_dic["operand"].isnumeric():
+                        cons_2 = int(state_0_truth_asgn_dic["operand"])
+                    else:
+                        cons_2 = 0
+                    if state_0_false_asgn_dic["operand"].isnumeric():
+                        cons_3 = int(state_0_false_asgn_dic["operand"])
+                    else:
+                        cons_3 = 0
+                    # if 
+                elif kind == "pred_raw":
+                    # TODO for pred_raw
+                    nothing = ""
+                else:
+                    assert kind == "raw", "wrong ALU type"
+                    # TODO for raw
+                    nothing = ""
+                
                 #TODO: get stateful_alu_string
-                stateful_alu_string = "00001100"+"000000"+"000000"+"000000"+"01110100000000000101011001011000000000"
+                stateful_alu_string = "00001100"+"000000"+"000000"+"000000"+to_bit_string(cons_1, cons_2, cons_3, sel_1, sel_2, sel_3, sel_4, sel_5, sel_6, rel_opcode,origin_or_updated)
+                # print(to_bit_string(cons_1, cons_2, cons_3, sel_1, sel_2, sel_3, sel_4, sel_5, sel_6, rel_opcode,origin_or_updated))
+                # print("01110100000000000101011001011000000000")
                 update_state_dic[ALU_name] = stateful_alu_string
-    print("update_state_dic =", update_state_dic)
+    # print("update_state_dic =", update_state_dic)
 
     fpga_conf_gen.text_gen(pkt_fields_def, tmp_fields_def, stateful_var_def, table_act_dic, table_size_dic, match_field_dic,
 match_action_rule, tmp_alu_dic, state_var_op_dic, action_alu_dic, pkt_alu_dic, update_var_dic, update_state_dic,
